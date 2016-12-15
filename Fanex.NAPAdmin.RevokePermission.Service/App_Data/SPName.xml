@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Functions>
+  <Function>
+    <Setting Key="RevokeUserPermission"
+             SpName="Task_NAP_RevokeUserPermission"
+             DbName="DBNAP.bodb_NAP.bodbAdminNet"
+             Plain="0">
+    </Setting>
+  </Function>
+</Functions>
