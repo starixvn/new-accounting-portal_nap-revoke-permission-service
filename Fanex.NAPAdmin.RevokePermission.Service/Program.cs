@@ -1,12 +1,12 @@
 ﻿namespace Fanex.NAPAdmin.RevokePermission.Service
 {
     using System;
-    using Fanex.Data;
-    using Fanex.Data.OldConnectionStringProvider;
-    using Fanex.Logging;
+    using Data;
+    using Data.OldConnectionStringProvider;
+    using Logging;
     using Topshelf;
 
-    internal class Program
+    internal static class Program
     {
         private static void Main(string[] args)
         {

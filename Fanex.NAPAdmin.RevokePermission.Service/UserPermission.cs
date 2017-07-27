@@ -3,32 +3,59 @@
     using System;
     using System.Configuration;
     using System.Timers;
-    using Fanex.Data;
-    using Fanex.Logging;
+    using Data;
+    using Logging;
     using ONEbook.UM.Services;
     using ONEbook.UM.Services.Impl;
 
-    internal class UserPermission : IDisposable
+    public class UserPermission : IDisposable
     {
         private const int DefaultGMT = 7;
         private const string DefaultStartFrom = "00:05";
         private const double DefaultDelayHours = 1;
 
-        private IMaintenanceService _maintenanceService = new MaintenanceService();
+        private readonly IMaintenanceService maintenanceService;
+        private readonly Timer dailyTimer;
+        private readonly Timer delayTimer;
+        private bool isFirstTime;
 
-        private Timer _dailyTimer = new Timer();
-        private Timer _delayTimer = new Timer(DefaultDelayHours * 60 * 60 * 1000);
-        private bool _isFirstTime = true;
+        public UserPermission()
+        {
+            maintenanceService = new MaintenanceService();
+            dailyTimer = new Timer();
+            delayTimer = new Timer(DefaultDelayHours * 60 * 60 * 1000);
+            isFirstTime = true;
+        }
 
         public void Revoke()
         {
             SetUpTimer();
-            _dailyTimer.Start();
+            dailyTimer.Start();
+        }
+
+        public void OnStop()
+        {
+            StopTimer();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                StopTimer();
+            }
         }
 
         private void SetUpTimer()
         {
             int gmt = DefaultGMT;
+
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["GMT"])
                 && int.TryParse(ConfigurationManager.AppSettings["GMT"], out gmt))
             {
@@ -42,10 +69,10 @@
 
             var utcTime = DateTime.UtcNow.AddHours(gmt);
             var firstInterval = CalculateFirstInterval(timeStart, utcTime.TimeOfDay);
-            _dailyTimer.Interval = firstInterval.TotalMilliseconds;
+            dailyTimer.Interval = firstInterval.TotalMilliseconds;
 
-            _dailyTimer.Elapsed += DailyElapsedEvent;
-            _delayTimer.Elapsed += DelayElapsedEvent;
+            dailyTimer.Elapsed += DailyElapsedEvent;
+            delayTimer.Elapsed += DelayElapsedEvent;
         }
 
         private TimeSpan CalculateFirstInterval(TimeSpan startTime, TimeSpan startTimeOfService)
@@ -57,16 +84,16 @@
 
         private void DailyElapsedEvent(object source, ElapsedEventArgs e)
         {
-            if (_isFirstTime)
+            if (isFirstTime)
             {
                 ResetDailyTimer();
             }
 
-            if (_maintenanceService.GetUnderMaintenanceTime().IsUnderMaintenanceTime)
+            if (maintenanceService.GetUnderMaintenanceTime().IsUnderMaintenanceTime)
             {
-                if (_delayTimer.Enabled == false)
+                if (delayTimer.Enabled == false)
                 {
-                    _delayTimer.Start();
+                    delayTimer.Start();
                 }
             }
             else
@@ -77,17 +104,17 @@
 
         private void ResetDailyTimer()
         {
-            _dailyTimer.Stop();
-            _dailyTimer.Interval = new TimeSpan(24, 0, 0).TotalMilliseconds;
-            _dailyTimer.Start();
-            _isFirstTime = false;
+            dailyTimer.Stop();
+            dailyTimer.Interval = new TimeSpan(24, 0, 0).TotalMilliseconds;
+            dailyTimer.Start();
+            isFirstTime = false;
         }
 
         private void DelayElapsedEvent(object source, ElapsedEventArgs e)
         {
-            if (!_maintenanceService.GetUnderMaintenanceTime().IsUnderMaintenanceTime)
+            if (!maintenanceService.GetUnderMaintenanceTime().IsUnderMaintenanceTime)
             {
-                _delayTimer.Stop();
+                delayTimer.Stop();
                 ExecuteRevocationSP();
             }
         }
@@ -107,23 +134,13 @@
             }
         }
 
-        public void OnStop()
-        {
-            StopTimer();
-        }
-
-        public void Dispose()
-        {
-            StopTimer();
-        }
-
         private void StopTimer()
         {
-            _dailyTimer.Stop();
-            _dailyTimer.Close();
+            dailyTimer.Stop();
+            dailyTimer.Close();
 
-            _delayTimer.Stop();
-            _delayTimer.Close();
+            delayTimer.Stop();
+            delayTimer.Close();
         }
     }
 }

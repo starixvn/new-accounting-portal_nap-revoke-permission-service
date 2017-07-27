@@ -90,13 +90,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserPermission.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <Content Include="App.pro.config" />
+    <Content Include="App.uat.config" />
+    <Content Include="App.sit.config" />
+    <Content Include="App.local.config" />
+    <Content Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
