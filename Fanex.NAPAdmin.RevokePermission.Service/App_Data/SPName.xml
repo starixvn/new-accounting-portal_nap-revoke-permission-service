@@ -3,7 +3,7 @@
   <Function>
     <Setting Key="RevokeUserPermission"
              SpName="Task_NAP_RevokeUserPermission"
-             DbName="DBNAP.bodb_NAP.bodbAdminNet"
+             DbName="DBPOL.NAP_UserControl.bodbAdminNet"
              Plain="0">
     </Setting>
   </Function>

@@ -30,3 +30,9 @@ $tf*/
 .vs/config/applicationhost.config
 node_modules
 packages
+
+#Ignore thumbnails created by Windows
+#Ignore files built by Visual Studio
+.vs/
+#Nuget packages folder
+packages/

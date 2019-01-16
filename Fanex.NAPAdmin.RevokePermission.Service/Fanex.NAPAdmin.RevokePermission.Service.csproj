@@ -97,11 +97,13 @@
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App.pro.config" />
-    <Content Include="App.uat.config" />
-    <Content Include="App.sit.config" />
+    <Content Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="App.local.config" />
-    <Content Include="App.config" />
+    <Content Include="App.pro.config" />
+    <Content Include="App.sit.config" />
+    <Content Include="App.uat.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
