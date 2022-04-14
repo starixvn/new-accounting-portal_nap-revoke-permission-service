@@ -1,9 +1,13 @@
 ﻿namespace Fanex.NAPAdmin.RevokePermission.Service
 {
     using System;
+    using System.Collections.Generic;
+    using System.Configuration;
     using Data;
     using Data.OldConnectionStringProvider;
+    using Fanex.Logging.Sentry.RavenClient;
     using Logging;
+    using SharpRaven;
     using Topshelf;
 
     internal static class Program
@@ -11,6 +15,7 @@
         private static void Main(string[] args)
         {
             ConfigureFanexData();
+            ConfigureFanexLogging();
             ConfigureService();
         }
 
@@ -33,6 +38,19 @@
             }
         }
 
+        private static void ConfigureFanexLogging()
+        {
+            LogManager
+                .SetDefaultLogCategory(ConfigurationManager.AppSettings["SiteCategory"])
+                .Use(new List<ILogEngine>
+                {
+                    new SentryLogging(new SentryEngineOptions
+                    {
+                        Dsn = new Dsn(ConfigurationManager.AppSettings["SentryToken"])
+                    })
+                });
+        }
+
         private static void ConfigureService()
         {
             HostFactory.Run(configure =>
@@ -44,8 +62,8 @@
                     service.WhenStopped(s => s.OnStop());
                 });
 
-                configure.SetServiceName("Fanex.NAPAdmin.RevokePermission.Service");
-                configure.SetDisplayName("Fanex.NAPAdmin.RevokePermission.Service");
+                configure.SetServiceName("Fanex.NAP.Admin.RevokePermission.Service");
+                configure.SetDisplayName("Fanex.NAP.Admin.RevokePermission.Service");
                 configure.SetDescription("Revoke user permission daily");
 
                 configure.RunAsLocalSystem();
